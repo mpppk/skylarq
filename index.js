@@ -19,7 +19,8 @@ const extractQuestion = nightmare => {
   return new Promise((resolve, reject) => {
     nightmare.evaluate(() => {
       const mainQuestionText = document.querySelector('.mainQuestion').textContent
-      if(mainQuestionText !== '下記についてお答えください。' && mainQuestionText !== '下記の点での満足度をお聞かせください。'){
+      if(mainQuestionText !== '下記についてお答えください。' && mainQuestionText !== '下記の点での満足度をお聞かせください。'
+        && mainQuestionText !== '今回の来店体験からお答えください。'){
         console.log('single question');
         return mainQuestionText;
       }
@@ -44,7 +45,9 @@ const inputAnswer = (nightmare, setting) => {
         }
         if(typeof setting[q].choices !== 'undefined'){
           // nth-of-typeのindexがなぜこうなるのかは分からないがこれで取れる
-          const choicesIndex = (qs.length === 1) ? 3 : ((i+1)*2+2);
+          let choicesIndex = (qs.length === 1) ? 3 : ((i+1)*2+2);
+          if(q === '1ヶ月以内にこのガストに再来店する。'){choicesIndex = 4;}
+          if(q === '一緒に来店された人数についてお聞かせください。'){choicesIndex = 4;}
           const answerIndex = getAnswerNum(q) + 1;
           const selector = '.choices:nth-of-type(' + choicesIndex + ')>.choice:nth-of-type(' + answerIndex + ') label';
           nightmare.click(selector);
@@ -73,36 +76,15 @@ nightmare = nightmare
 
 const loop = nightmare => {
   console.log('in loop');
-  // if(nightmare.exists('#cooponCode')){
-  //   console.log('find coopon code');
-  //   nightmare.screenshot('./' + setting.code + '.png', true);
-  //   nightmare.evaluate(() => document.getElementById('#cooponCode').textContent)
-  //   .then(c => {
-  //     console.log('coopon code:');
-  //     console.log(c);
-  //     process.exit(0);
-  //   });
-  // }
-  console.log('start');
   inputAnswer(nightmare.wait(1000), setting)
   .then(() => {
     loop(nightmare
     .wait(500)
     .click('a.nextBtn'));
-    // if(nextPage.exists('#cooponCode')){
-    //   nextPage.screenshot('./' + setting.code + '.png', true);
-    //   nextPage.evaluate(() => document.getElementById('#cooponCode'))
-    //   .then(c => {
-    //     console.log('coopon code:');
-    //     console.log(c);
-    //   });
-    // }
   },
   e => {
     console.log('回答の入力に失敗しました: ' + e);
-    // process.exit(1);
   })
-  // .then(loopFlag => loopFlag ? loop(nightmare) : 'finish');
 }
 
 

@@ -12,6 +12,13 @@ const getAnswerNum = q => setting[q].choices.indexOf(getAnswer(q));
 
 const SUB_QUESTION_LIST = ['下記についてお答えください。', '下記の点での満足度をお聞かせください。', '今回の来店体験からお答えください。'];
 
+const EXCEPTIONAL_QUESTION_LIST = ['1ヶ月以内にこのガストに再来店する。', '一緒に来店された人数についてお聞かせください。'];
+// q => 質問内容の文字列, i => 何番目の質問か, qsLength => 全体で何問質問があるか
+const getIndexFromQuestionList = (q, i, qsLength) => {
+  if(EXCEPTIONAL_QUESTION_LIST.includes(q)){return 4;}
+  return (qsLength === 1) ? 3 : ((i+1)*2+2);
+};
+
 const extractQuestion = nightmare => {
   return new Promise((resolve, reject) => {
     nightmare.evaluate(SUB_QUESTION_LIST => {
@@ -36,11 +43,8 @@ const inputAnswer = (nightmare, setting) => {
         }
         if(typeof setting[q].choices !== 'undefined'){
           // nth-of-typeのindexがなぜこうなるのかは分からないがこれで取れる
-          let choicesIndex = (qs.length === 1) ? 3 : ((i+1)*2+2);
-          if(q === '1ヶ月以内にこのガストに再来店する。'){choicesIndex = 4;}
-          if(q === '一緒に来店された人数についてお聞かせください。'){choicesIndex = 4;}
           const answerIndex = getAnswerNum(q) + 1;
-          const selector = '.choices:nth-of-type(' + choicesIndex + ')>.choice:nth-of-type(' + answerIndex + ') label';
+          const selector = '.choices:nth-of-type(' + getIndexFromQuestionList(q, i, qs.length) + ')>.choice:nth-of-type(' + answerIndex + ') label';
           nightmare.click(selector);
         }else{
           nightmare.insert('textarea.faInput', setting[q].answer);

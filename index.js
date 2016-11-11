@@ -67,16 +67,11 @@ const agreeTerms =
   .check('#agreeContainer>#agree')
   .click('.inputContainer>.btn');
 
-const loop = nightmare => {
-  inputAnswer(nightmare.wait(1000), setting)
-  .then(() => loop(nightmare.wait(500)),
-         e => console.log('回答の入力に失敗しました: ' + e));
-}
-
 const co = require('co');
+const nightmare = Nightmare({ show: true }).goto('https://my.skylark.co.jp');
+
 co(function * (){
-  const nightmare = Nightmare({ show: true }).goto('https://my.skylark.co.jp');
   yield insertCode(nightmare);
   yield agreeTerms(nightmare);
-  loop(nightmare);
+  while(true){ yield inputAnswer(nightmare.wait(1000), setting); }
 });

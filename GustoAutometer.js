@@ -39,12 +39,12 @@ module.exports = class GustoAutometer {
   inputAnswer(qs){
     qs.forEach((q, i) => {
         if(typeof this.setting[q].choices !== 'undefined'){
-        // nth-of-typeのindexがなぜこうなるのかは分からないがこれで取れる
-        const answerIndex = this.getAnswerNum(q) + 1;
-        const selector = '.choices:nth-of-type(' + this.getIndexFromQuestionList(q, i, qs.length) + ')>.choice:nth-of-type(' + answerIndex + ') label';
-        this.nightmare.click(selector);
+            // nth-of-typeのindexがなぜこうなるのかは分からないがこれで取れる
+            const answerIndex = this.getAnswerNum(q) + 1;
+            const selector = '.choices:nth-of-type(' + this.getIndexFromQuestionList(q, i, qs.length) + ')>.choice:nth-of-type(' + answerIndex + ') label';
+            this.nightmare.click(selector);
         }else{
-        this.nightmare.insert('textarea.faInput', this.setting[q].answer);
+            this.nightmare.insert('textarea.faInput', this.setting[q].answer);
         }
     });
     return Promise.resolve(this.nightmare);

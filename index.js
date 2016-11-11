@@ -1,7 +1,6 @@
 const fs = require('fs');
 const yaml = require('js-yaml');
 const Nightmare = require('nightmare');
-let nightmare = Nightmare({ show: true });
 
 const setting = yaml.safeLoad(fs.readFileSync('./setting.yml','utf8'));
 
@@ -60,18 +59,24 @@ const inputAnswer = (nightmare, setting) => {
   });
 }
 
-nightmare = nightmare
-  .goto('https://my.skylark.co.jp')
-  .insert('input[id*="code"]', setting.code)
-  .click('a[class="btn"]')
-  .wait('#agreeContainer>#agree')
+const insertCode =
+  nightmare => nightmare.insert('input[id*="code"]', setting.code).click('a[class="btn"]');
+
+const agreeTerms = 
+  nightmare => nightmare.wait('#agreeContainer>#agree')
   .check('#agreeContainer>#agree')
-  .click('.inputContainer>.btn')
+  .click('.inputContainer>.btn');
 
 const loop = nightmare => {
   inputAnswer(nightmare.wait(1000), setting)
-  .then(() => loop(nightmare.wait(500).click('a.nextBtn')),
+  .then(() => loop(nightmare.wait(500)),
          e => console.log('回答の入力に失敗しました: ' + e));
 }
 
-loop(nightmare);
+const co = require('co');
+co(function * (){
+  const nightmare = Nightmare({ show: true }).goto('https://my.skylark.co.jp');
+  yield insertCode(nightmare);
+  yield agreeTerms(nightmare);
+  loop(nightmare);
+});

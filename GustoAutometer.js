@@ -60,6 +60,10 @@ module.exports = class GustoAutometer {
     .click('.inputContainer>.btn');
   }
 
+  nextPage(){
+      return this.nightmare.wait('a.nextBtn').click('a.nextBtn');
+  }
+
   wait(time){ return this.nightmare.wait(time); }
 }
 

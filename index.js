@@ -26,37 +26,30 @@ const extractQuestion = nightmare => {
       const subQuestions = document.querySelectorAll('.subQuestion');
       return Array.from(subQuestions, n => n.textContent);
     }, SUB_QUESTION_LIST)
-    .then(q => resolve(q), e => console.dir(e));  
+    .then(qs => resolve(Array.isArray(qs) ? qs : [qs]), e => console.dir(e));
   });
 }
 
 const getInvalidQuestions = (qs, setting) => qs.filter( q => typeof setting[q] === 'undefined');
 
-const inputAnswer = (nightmare, setting) => {
-  return new Promise((resolve, reject) => {
-    extractQuestion(nightmare)
-    .then(qs => {
-      qs = Array.isArray(qs) ? qs : [qs];
-      const invalidQuestions = getInvalidQuestions(qs, setting);
-      if(invalidQuestions.length > 0){
-        reject( new Error('予期しない質問です(' + invalidQuestions + ')'));
-        return;
-      }
+const validateQuestions = (qs, setting) => {
+  return (getInvalidQuestions(qs, setting).length > 0) ? 
+    Promise.reject( new Error('予期しない質問です(' + invalidQuestions + ')')) :
+    Promise.resolve(qs);
+};
 
-      qs.forEach((q, i) => {
-        if(typeof setting[q].choices !== 'undefined'){
-          // nth-of-typeのindexがなぜこうなるのかは分からないがこれで取れる
-          const answerIndex = getAnswerNum(q) + 1;
-          const selector = '.choices:nth-of-type(' + getIndexFromQuestionList(q, i, qs.length) + ')>.choice:nth-of-type(' + answerIndex + ') label';
-          nightmare.click(selector);
-        }else{
-          nightmare.insert('textarea.faInput', setting[q].answer);
-        }
-      });
-      resolve(nightmare);
-    },
-    e => console.log('問題文の抽出に失敗しました: ' + e));
+const inputAnswer = (nightmare, setting, qs) => {
+  qs.forEach((q, i) => {
+    if(typeof setting[q].choices !== 'undefined'){
+      // nth-of-typeのindexがなぜこうなるのかは分からないがこれで取れる
+      const answerIndex = getAnswerNum(q) + 1;
+      const selector = '.choices:nth-of-type(' + getIndexFromQuestionList(q, i, qs.length) + ')>.choice:nth-of-type(' + answerIndex + ') label';
+      nightmare.click(selector);
+    }else{
+      nightmare.insert('textarea.faInput', setting[q].answer);
+    }
   });
+  return Promise.resolve(nightmare);
 }
 
 const insertCode =
@@ -73,5 +66,10 @@ const nightmare = Nightmare({ show: true }).goto('https://my.skylark.co.jp');
 co(function * (){
   yield insertCode(nightmare);
   yield agreeTerms(nightmare);
-  while(true){ yield inputAnswer(nightmare.wait(1000), setting); }
+  while(true){
+    yield nightmare.wait(1000);
+    const qs = yield extractQuestion(nightmare);
+    yield validateQuestions(qs, setting);
+    yield inputAnswer(nightmare.wait(1000), setting, qs);
+  }
 });

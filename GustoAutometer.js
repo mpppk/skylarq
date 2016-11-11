@@ -5,7 +5,7 @@ const Nightmare = require('nightmare');
 module.exports = class GustoAutometer {
   constructor(settingFilePath){
     this.nightmare = Nightmare({ show: true }).goto('https://my.skylark.co.jp');
-    this.setting = yaml.safeLoad(fs.readFileSync(settingFilePath,'utf8'));
+    this.setting = yaml.safeLoad(fs.readFileSync(settingFilePath || './gusto.yml', 'utf8'));
     this.SUB_QUESTION_LIST = ['下記についてお答えください。', '下記の点での満足度をお聞かせください。', '今回の来店体験からお答えください。'];    
     this.EXCEPTIONAL_QUESTION_LIST = ['1ヶ月以内にこのガストに再来店する。', '一緒に来店された人数についてお聞かせください。'];
   }

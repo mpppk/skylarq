@@ -2,7 +2,7 @@ const co = require('co');
 const GustoAutometer = require('./GustoAutometer'); 
 
 co(function * (){
-  const gusto = new GustoAutometer('./setting.yml');
+  const gusto = new GustoAutometer();
   yield gusto.insertCode();
   yield gusto.agreeTerms();
 

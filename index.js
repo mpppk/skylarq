@@ -30,16 +30,20 @@ const extractQuestion = nightmare => {
   });
 }
 
+const getInvalidQuestions = (qs, setting) => qs.filter( q => typeof setting[q] === 'undefined');
+
 const inputAnswer = (nightmare, setting) => {
   return new Promise((resolve, reject) => {
     extractQuestion(nightmare)
     .then(qs => {
       qs = Array.isArray(qs) ? qs : [qs];
-      const successFlags = qs.map((q, i) => { // nightmareへのside effectが主目的なので注意
-        if(typeof setting[q] === 'undefined') {
-          reject( new Error('予期しない質問です(' + q + ')'));
-          return false;
-        }
+      const invalidQuestions = getInvalidQuestions(qs, setting);
+      if(invalidQuestions.length > 0){
+        reject( new Error('予期しない質問です(' + invalidQuestions + ')'));
+        return;
+      }
+
+      qs.forEach((q, i) => {
         if(typeof setting[q].choices !== 'undefined'){
           // nth-of-typeのindexがなぜこうなるのかは分からないがこれで取れる
           const answerIndex = getAnswerNum(q) + 1;
@@ -48,12 +52,8 @@ const inputAnswer = (nightmare, setting) => {
         }else{
           nightmare.insert('textarea.faInput', setting[q].answer);
         }
-        return true;
       });
-
-      if(!successFlags.includes(false)){
-        resolve(nightmare);
-      }
+      resolve(nightmare);
     },
     e => console.log('問題文の抽出に失敗しました: ' + e));
   });

@@ -8,8 +8,7 @@ co(function * (){
 
   while(true){
     yield gusto.wait(1000);
-    let qs = yield gusto.extractQuestion();
-    qs = Array.isArray(qs) ? qs : [qs];
+    let qs = yield gusto.extractQuestions();
     yield gusto.validateQuestions(qs);
     yield gusto.inputAnswer(qs);
   }

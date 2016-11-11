@@ -19,10 +19,10 @@ module.exports = class GustoAutometer {
     return (qsLength === 1) ? 3 : ((i+1)*2+2);
   }
 
-  extractQuestion(){
+  extractQuestions(){
     return this.nightmare.evaluate(SUB_QUESTION_LIST => {
         const mainQuestionText = document.querySelector('.mainQuestion').textContent;
-        if(!SUB_QUESTION_LIST.includes(mainQuestionText)){ return mainQuestionText; }
+        if(!SUB_QUESTION_LIST.includes(mainQuestionText)){ return [mainQuestionText]; }
         const subQuestions = document.querySelectorAll('.subQuestion');
         return Array.from(subQuestions, n => n.textContent);
     }, this.SUB_QUESTION_LIST);

@@ -10,18 +10,16 @@ const getAnswer = q =>
 
 const getAnswerNum = q => setting[q].choices.indexOf(getAnswer(q));
 
+const SUB_QUESTION_LIST = ['下記についてお答えください。', '下記の点での満足度をお聞かせください。', '今回の来店体験からお答えください。'];
+
 const extractQuestion = nightmare => {
   return new Promise((resolve, reject) => {
-    nightmare.evaluate(() => {
-      const mainQuestionText = document.querySelector('.mainQuestion').textContent
-      if(mainQuestionText !== '下記についてお答えください。' && mainQuestionText !== '下記の点での満足度をお聞かせください。'
-        && mainQuestionText !== '今回の来店体験からお答えください。'){
-        return mainQuestionText;
-      }
-
+    nightmare.evaluate(SUB_QUESTION_LIST => {
+      const mainQuestionText = document.querySelector('.mainQuestion').textContent;
+      if(!SUB_QUESTION_LIST.includes(mainQuestionText)){ return mainQuestionText; }
       const subQuestions = document.querySelectorAll('.subQuestion');
       return Array.from(subQuestions, n => n.textContent);
-    })
+    }, SUB_QUESTION_LIST)
     .then(q => resolve(q), e => console.dir(e));  
   });
 }

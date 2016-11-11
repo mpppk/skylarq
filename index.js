@@ -66,14 +66,8 @@ nightmare = nightmare
 
 const loop = nightmare => {
   inputAnswer(nightmare.wait(1000), setting)
-  .then(() => {
-    loop(nightmare
-    .wait(500)
-    .click('a.nextBtn'));
-  },
-  e => {
-    console.log('回答の入力に失敗しました: ' + e);
-  })
+  .then(() => loop(nightmare.wait(500).click('a.nextBtn')),
+         e => console.log('回答の入力に失敗しました: ' + e));
 }
 
 loop(nightmare);

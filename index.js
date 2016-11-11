@@ -19,15 +19,12 @@ const getIndexFromQuestionList = (q, i, qsLength) => {
 };
 
 const extractQuestion = nightmare => {
-  return new Promise((resolve, reject) => {
-    nightmare.evaluate(SUB_QUESTION_LIST => {
-      const mainQuestionText = document.querySelector('.mainQuestion').textContent;
-      if(!SUB_QUESTION_LIST.includes(mainQuestionText)){ return mainQuestionText; }
-      const subQuestions = document.querySelectorAll('.subQuestion');
-      return Array.from(subQuestions, n => n.textContent);
-    }, SUB_QUESTION_LIST)
-    .then(qs => resolve(Array.isArray(qs) ? qs : [qs]), e => console.dir(e));
-  });
+  return nightmare.evaluate(SUB_QUESTION_LIST => {
+    const mainQuestionText = document.querySelector('.mainQuestion').textContent;
+    if(!SUB_QUESTION_LIST.includes(mainQuestionText)){ return mainQuestionText; }
+    const subQuestions = document.querySelectorAll('.subQuestion');
+    return Array.from(subQuestions, n => n.textContent);
+  }, SUB_QUESTION_LIST);
 }
 
 const getInvalidQuestions = (qs, setting) => qs.filter( q => typeof setting[q] === 'undefined');
@@ -68,7 +65,8 @@ co(function * (){
   yield agreeTerms(nightmare);
   while(true){
     yield nightmare.wait(1000);
-    const qs = yield extractQuestion(nightmare);
+    let qs = yield extractQuestion(nightmare);
+    qs = Array.isArray(qs) ? qs : [qs];
     yield validateQuestions(qs, setting);
     yield inputAnswer(nightmare.wait(1000), setting, qs);
   }

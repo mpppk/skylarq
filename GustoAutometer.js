@@ -1,6 +1,7 @@
 const fs = require('fs');
 const yaml = require('js-yaml');
 const Nightmare = require('nightmare');
+const co = require('co');
 
 module.exports = class GustoAutometer {
   constructor(settingFilePath){
@@ -58,6 +59,15 @@ module.exports = class GustoAutometer {
     return this.nightmare.wait('#agreeContainer>#agree')
     .check('#agreeContainer>#agree')
     .click('.inputContainer>.btn');
+  }
+
+  answerQuestions(){
+    const self = this;
+    return co(function*(){
+        let qs = yield self.extractQuestions();
+        yield self.validateQuestions(qs);
+        return yield self.inputAnswer(qs);
+    });
   }
 
   nextPage(){

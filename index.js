@@ -8,8 +8,7 @@ co(function * (){
 
   while(true){
     yield gusto.wait(1000);
-    let qs = yield gusto.extractQuestions();
-    yield gusto.validateQuestions(qs);
-    yield gusto.inputAnswer(qs);
+    yield gusto.answerQuestions();
+    // yield gusto.nextPage();
   }
 });

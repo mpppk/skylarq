@@ -4,8 +4,12 @@ import * as Nightmare from 'nightmare';
 import * as co from 'co';
 
 module.exports = class GustoAutometer {
+  nightmare: any;
+  setting: any;
+  SUB_QUESTION_LIST: string[];
+  EXCEPTIONAL_QUESTION_LIST: string[];
   constructor(settingFilePath){
-    this.nightmare = Nightmare({ show: true }).goto('https://my.skylark.co.jp');
+    this.nightmare = new Nightmare({ show: true }).goto('https://my.skylark.co.jp');
     this.setting = yaml.safeLoad(fs.readFileSync(settingFilePath || './gusto.yml', 'utf8'));
     this.SUB_QUESTION_LIST = ['下記についてお答えください。', '下記の点での満足度をお聞かせください。', '今回の来店体験からお答えください。'];    
     this.EXCEPTIONAL_QUESTION_LIST = ['1ヶ月以内にこのガストに再来店する。', '一緒に来店された人数についてお聞かせください。'];
@@ -32,7 +36,8 @@ module.exports = class GustoAutometer {
   getInvalidQuestions(qs){ return qs.filter( q => typeof this.setting[q] === 'undefined'); } 
 
   validateQuestions(qs){
-    return (this.getInvalidQuestions(qs).length > 0) ? 
+    const invalidQuestions: string[] = this.getInvalidQuestions(qs);
+    return (invalidQuestions.length > 0) ? 
         Promise.reject( new Error('予期しない質問です(' + invalidQuestions + ')')) :
         Promise.resolve(qs);
   };

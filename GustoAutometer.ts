@@ -1,7 +1,7 @@
-const fs = require('fs');
-const yaml = require('js-yaml');
-const Nightmare = require('nightmare');
-const co = require('co');
+import * as fs from 'fs';
+import * as yaml from 'js-yaml';
+import * as Nightmare from 'nightmare';
+import * as co from 'co';
 
 module.exports = class GustoAutometer {
   constructor(settingFilePath){

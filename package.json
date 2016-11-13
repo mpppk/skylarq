@@ -10,6 +10,9 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@types/js-yaml": "^3.5.28",
+    "@types/nightmare": "^1.6.30",
+    "@types/node": "^6.0.46",
     "co": "^4.6.0",
     "js-yaml": "^3.6.1",
     "nightmare": "^2.8.1"

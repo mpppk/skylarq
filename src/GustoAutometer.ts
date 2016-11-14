@@ -2,21 +2,26 @@ import * as fs from 'fs';
 import * as yaml from 'js-yaml';
 import * as Nightmare from 'nightmare';
 import * as co from 'co';
+import { Setting } from './Setting';
+import { Question } from './Question';
 
 module.exports = class GustoAutometer {
   nightmare: any;
-  setting: any;
+  setting: Setting;
+  questions: { [index: string]: Question; };
   SUB_QUESTION_LIST: string[];
   EXCEPTIONAL_QUESTION_LIST: string[];
   constructor(settingFilePath){
-    this.nightmare = new Nightmare({ show: true }).goto('https://my.skylark.co.jp');
     this.setting = yaml.safeLoad(fs.readFileSync(settingFilePath || './gusto.yml', 'utf8'));
+    this.nightmare = new Nightmare({ show: true }).goto('https://my.skylark.co.jp');
+    this.questions = this.setting.questions;
+    console.log(this.questions);
     this.SUB_QUESTION_LIST = ['下記についてお答えください。', '下記の点での満足度をお聞かせください。', '今回の来店体験からお答えください。'];    
     this.EXCEPTIONAL_QUESTION_LIST = ['1ヶ月以内にこのガストに再来店する。', '一緒に来店された人数についてお聞かせください。'];
   }
 
-  getAnswer(q){ return (typeof this.setting[q] === undefined) ? null : this.setting[q].answer; }
-  getAnswerNum(q){ return this.setting[q].choices.indexOf(this.getAnswer(q)); }
+  getAnswer(q){ return (typeof this.questions[q] === undefined) ? null : this.questions[q].answer; }
+  getAnswerNum(q){ return this.questions[q].choices.indexOf(this.getAnswer(q)); }
 
   // q => 質問内容の文字列, i => 何番目の質問か, qsLength => 全体で何問質問があるか
   getIndexFromQuestionList(q, i, qsLength){
@@ -33,7 +38,7 @@ module.exports = class GustoAutometer {
     }, this.SUB_QUESTION_LIST);
   }
 
-  getInvalidQuestions(qs){ return qs.filter( q => typeof this.setting[q] === 'undefined'); } 
+  getInvalidQuestions(qs){ return qs.filter( q => typeof this.questions[q] === 'undefined'); } 
 
   validateQuestions(qs){
     const invalidQuestions: string[] = this.getInvalidQuestions(qs);
@@ -44,13 +49,13 @@ module.exports = class GustoAutometer {
 
   inputAnswer(qs){
     qs.forEach((q, i) => {
-        if(typeof this.setting[q].choices !== 'undefined'){
+        if(typeof this.questions[q].choices !== 'undefined'){
             // nth-of-typeのindexがなぜこうなるのかは分からないがこれで取れる
             const answerIndex = this.getAnswerNum(q) + 1;
             const selector = '.choices:nth-of-type(' + this.getIndexFromQuestionList(q, i, qs.length) + ')>.choice:nth-of-type(' + answerIndex + ') label';
             this.nightmare.click(selector);
         }else{
-            this.nightmare.insert('textarea.faInput', this.setting[q].answer);
+            this.nightmare.insert('textarea.faInput', this.questions[q].answer);
         }
     });
     return Promise.resolve(this.nightmare);

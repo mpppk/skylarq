@@ -6,7 +6,7 @@ import { Setting } from './Setting';
 import { Question } from './Question';
 
 module.exports = class GustoAutometer {
-  nightmare: any;
+  nightmare: Nightmare;
   setting: Setting;
   questions: { [index: string]: Question; };
   SUB_QUESTION_LIST: string[];
@@ -62,7 +62,7 @@ module.exports = class GustoAutometer {
   }
 
   insertCode(){
-    return this.nightmare.insert('input[id*="code"]', this.setting.code).click('a[class="btn"]'); 
+    return this.nightmare.insert('input[id*="code"]', this.setting.code.toString()).click('a[class="btn"]'); 
   }
 
   agreeTerms(){

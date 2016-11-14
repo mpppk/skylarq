@@ -19,19 +19,22 @@ module.exports = class GustoAutometer {
     this.EXCEPTIONAL_QUESTION_LIST = ['1ヶ月以内にこのガストに再来店する。', '一緒に来店された人数についてお聞かせください。'];
   }
 
-  getAnswer(q: string){ return (typeof this.questions[q] === undefined) ? null : this.questions[q].answer; }
-  getAnswerNum(q: string){ 
+  getAnswer(q: string): string | null{
+    return (typeof this.questions[q] === undefined) ? null : this.questions[q].answer;
+  }
+
+  getAnswerNum(q: string): number{ 
     const answer: string | null = this.getAnswer(q);
     return answer === null ? -1 : this.questions[q].choices.indexOf(answer);
   }
 
   // q => 質問内容の文字列, i => 何番目の質問か, qsLength => 全体で何問質問があるか
-  getIndexFromQuestionList(q: string, i: number, qsLength: number){
+  getIndexFromQuestionList(q: string, i: number, qsLength: number): number{
     if(this.EXCEPTIONAL_QUESTION_LIST.includes(q)){return 4;}
     return (qsLength === 1) ? 3 : ((i+1)*2+2);
   }
 
-  extractQuestions(){
+  extractQuestions(): Nightmare{
     return this.nightmare.evaluate(SUB_QUESTION_LIST => {
         const mainQuestionText: string | null = document.querySelector('.mainQuestion').textContent;
         if(mainQuestionText === null){
@@ -44,16 +47,18 @@ module.exports = class GustoAutometer {
     }, this.SUB_QUESTION_LIST);
   }
 
-  getInvalidQuestions(qs: string[]){ return qs.filter( q => typeof this.questions[q] === 'undefined'); } 
+  getInvalidQuestions(qs: string[]): string[]{
+    return qs.filter( q => typeof this.questions[q] === 'undefined');
+  } 
 
-  validateQuestions(qs: string[]){
+  validateQuestions(qs: string[]): Promise<string[]>{
     const invalidQuestions: string[] = this.getInvalidQuestions(qs);
     return (invalidQuestions.length > 0) ? 
         Promise.reject( new Error('予期しない質問です(' + invalidQuestions + ')')) :
         Promise.resolve(qs);
   };
 
-  inputAnswer(qs: string[]){
+  inputAnswer(qs: string[]): Promise<Nightmare>{
     qs.forEach((q, i) => {
         if(typeof this.questions[q].choices !== 'undefined'){
             // nth-of-typeのindexがなぜこうなるのかは分からないがこれで取れる
@@ -67,17 +72,17 @@ module.exports = class GustoAutometer {
     return Promise.resolve(this.nightmare);
   }
 
-  insertCode(){
+  insertCode(): Nightmare{
     return this.nightmare.insert('input[id*="code"]', this.setting.code.toString()).click('a[class="btn"]'); 
   }
 
-  agreeTerms(){
+  agreeTerms(): Nightmare{
     return this.nightmare.wait('#agreeContainer>#agree')
     .check('#agreeContainer>#agree')
     .click('.inputContainer>.btn');
   }
 
-  answerQuestions(){
+  answerQuestions(): Promise<Nightmare>{
     const self = this;
     return co(function*(){
         let qs = yield self.extractQuestions();
@@ -86,10 +91,12 @@ module.exports = class GustoAutometer {
     });
   }
 
-  nextPage(){
+  nextPage(): Nightmare{
       return this.nightmare.wait('a.nextBtn').click('a.nextBtn');
   }
 
-  wait(time: number){ return this.nightmare.wait(time); }
+  wait(time: number): Nightmare{
+    return this.nightmare.wait(time);
+  }
 }
 

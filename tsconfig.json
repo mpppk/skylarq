@@ -7,6 +7,9 @@
         "lib": [
             "es2016",
             "dom"
-        ]
+        ],
+        "noImplicitAny": true,
+        "noUnusedLocals": true,
+        "strictNullChecks": true
     }
 }

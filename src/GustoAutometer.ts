@@ -11,7 +11,7 @@ module.exports = class GustoAutometer {
   questions: { [index: string]: Question; };
   SUB_QUESTION_LIST: string[];
   EXCEPTIONAL_QUESTION_LIST: string[];
-  constructor(settingFilePath){
+  constructor(settingFilePath: string){
     this.setting = yaml.safeLoad(fs.readFileSync(settingFilePath || './gusto.yml', 'utf8'));
     this.nightmare = new Nightmare({ show: true }).goto('https://my.skylark.co.jp');
     this.questions = this.setting.questions;
@@ -20,34 +20,41 @@ module.exports = class GustoAutometer {
     this.EXCEPTIONAL_QUESTION_LIST = ['1ヶ月以内にこのガストに再来店する。', '一緒に来店された人数についてお聞かせください。'];
   }
 
-  getAnswer(q){ return (typeof this.questions[q] === undefined) ? null : this.questions[q].answer; }
-  getAnswerNum(q){ return this.questions[q].choices.indexOf(this.getAnswer(q)); }
+  getAnswer(q: string){ return (typeof this.questions[q] === undefined) ? null : this.questions[q].answer; }
+  getAnswerNum(q: string){ 
+    const answer: string | null = this.getAnswer(q);
+    return answer === null ? -1 : this.questions[q].choices.indexOf(answer);
+  }
 
   // q => 質問内容の文字列, i => 何番目の質問か, qsLength => 全体で何問質問があるか
-  getIndexFromQuestionList(q, i, qsLength){
+  getIndexFromQuestionList(q: string, i: number, qsLength: number){
     if(this.EXCEPTIONAL_QUESTION_LIST.includes(q)){return 4;}
     return (qsLength === 1) ? 3 : ((i+1)*2+2);
   }
 
   extractQuestions(){
     return this.nightmare.evaluate(SUB_QUESTION_LIST => {
-        const mainQuestionText = document.querySelector('.mainQuestion').textContent;
+        const mainQuestionText: string | null = document.querySelector('.mainQuestion').textContent;
+        if(mainQuestionText === null){
+          throw new Error("main question text not found");
+        }
+
         if(!SUB_QUESTION_LIST.includes(mainQuestionText)){ return [mainQuestionText]; }
         const subQuestions = document.querySelectorAll('.subQuestion');
         return Array.from(subQuestions, n => n.textContent);
     }, this.SUB_QUESTION_LIST);
   }
 
-  getInvalidQuestions(qs){ return qs.filter( q => typeof this.questions[q] === 'undefined'); } 
+  getInvalidQuestions(qs: string[]){ return qs.filter( q => typeof this.questions[q] === 'undefined'); } 
 
-  validateQuestions(qs){
+  validateQuestions(qs: string[]){
     const invalidQuestions: string[] = this.getInvalidQuestions(qs);
     return (invalidQuestions.length > 0) ? 
         Promise.reject( new Error('予期しない質問です(' + invalidQuestions + ')')) :
         Promise.resolve(qs);
   };
 
-  inputAnswer(qs){
+  inputAnswer(qs: string[]){
     qs.forEach((q, i) => {
         if(typeof this.questions[q].choices !== 'undefined'){
             // nth-of-typeのindexがなぜこうなるのかは分からないがこれで取れる
@@ -84,6 +91,6 @@ module.exports = class GustoAutometer {
       return this.nightmare.wait('a.nextBtn').click('a.nextBtn');
   }
 
-  wait(time){ return this.nightmare.wait(time); }
+  wait(time: number){ return this.nightmare.wait(time); }
 }
 

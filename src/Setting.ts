@@ -1,5 +1,5 @@
 import { Question } from './Question';
-export class Setting{
+export interface Setting{
     questions: { [index: string]: Question; }
     code: number
 }

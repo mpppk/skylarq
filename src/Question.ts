@@ -1,4 +1,4 @@
-export class Question {
+export interface Question {
     choices: string[]
     answer: string
 }

@@ -7,8 +7,13 @@ co(function * (){
   yield gusto.agreeTerms();
 
   while(true){
-    yield gusto.wait(1000);
+    yield gusto.wait(3000);
     yield gusto.answerQuestions();
-    // yield gusto.nextPage();
+    if(yield gusto.hasCooponCode){ break; }
+    yield gusto.nextPage();
   }
+
+  const cooponCode = yield gusto.getCooponCode(); 
+  console.log('coopon code: ' + cooponCode);
+  // yield gusto.end();
 });

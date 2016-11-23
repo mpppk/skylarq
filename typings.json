@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "co": "registry:npm/co#4.6.0+20160905045231",
+    "nightmare": "registry:npm/nightmare#2.5.0+20160803174538"
+  }
+}

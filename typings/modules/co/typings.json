@@ -1,0 +1,10 @@
+{
+  "resolution": "main",
+  "tree": {
+    "src": "https://raw.githubusercontent.com/types/npm-co/650c90a3f097bbc2f8bded21d7d8586e2eb8ac91/typings.json",
+    "raw": "registry:npm/co#4.6.0+20160905045231",
+    "main": "index.d.ts",
+    "version": "4.6.0",
+    "name": "co"
+  }
+}

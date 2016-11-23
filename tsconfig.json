@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "target": "es6",
+        "module": "commonjs",
+        "outDir": "build",
+        "sourceMap": true,
+        "lib": [
+            "es2016",
+            "dom"
+        ],
+        "noImplicitAny": true,
+        "noUnusedLocals": true,
+        "strictNullChecks": true
+    }
+}

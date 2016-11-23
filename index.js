@@ -1,5 +1,5 @@
 const co = require('co');
-const GustoAutometer = require('./GustoAutometer'); 
+const GustoAutometer = require('./build/GustoAutometer'); 
 
 co(function * (){
   const gusto = new GustoAutometer();

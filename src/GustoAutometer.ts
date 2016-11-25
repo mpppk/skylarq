@@ -11,13 +11,15 @@ module.exports = class GustoAutometer {
   questions: { [index: string]: Question; };
   SUB_QUESTION_LIST: string[];
   EXCEPTIONAL_QUESTION_LIST: string[];
+  beforeQuestions: string[];
   constructor(settingFilePath: string) {
     this.setting = yaml.safeLoad(fs.readFileSync(settingFilePath || './gusto.yml', 'utf8'));
     this.nightmare = new Nightmare({ show: true }).goto('https://my.skylark.co.jp');
     this.questions = this.setting.questions;
     this.SUB_QUESTION_LIST = ['下記についてお答えください。', '下記の点での満足度をお聞かせください。', '今回の来店体験からお答えください。'];
     this.EXCEPTIONAL_QUESTION_LIST = ['1ヶ月以内にこのガストに再来店する。', '一緒に来店された人数についてお聞かせください。'];
-  }
+    this.beforeQuestions = ['none'];
+}
 
   getAnswer(q: string): string | null {
     return (typeof this.questions[q] === undefined) ? null : this.questions[q].answer;
@@ -85,7 +87,7 @@ module.exports = class GustoAutometer {
   answerQuestions(): Promise<Nightmare> {
     const self = this;
     return co(function*(){
-        let qs = yield self.extractQuestions();
+        let qs = yield self.waitForNextQuestion();
         yield self.validateQuestions(qs);
         return yield self.inputAnswer(qs);
     });
@@ -109,6 +111,23 @@ module.exports = class GustoAutometer {
 
   end(): Nightmare {
     return this.nightmare.end();
+  }
+
+  waitForNextQuestion(): Promise<Nightmare> {
+    const self = this;
+    return co(function*(){
+      while (true) {
+        try {
+          yield self.nightmare.wait(100);
+          const qs: string[] = yield self.extractQuestions();
+          if (qs === null || typeof qs === 'undefined' || qs.length === 0) { continue; };
+          if (JSON.stringify(qs) === JSON.stringify(self.beforeQuestions)) { continue; };
+          self.beforeQuestions = qs;
+          return qs;
+        }catch (e) {
+        }
+      }
+    });
   }
 };
 

@@ -98,5 +98,17 @@ module.exports = class GustoAutometer {
   wait(time: number): Nightmare {
     return this.nightmare.wait(time);
   }
+
+  hasCooponCode(): Nightmare {
+    return this.nightmare.exists('#cooponCode');
+  }
+
+  getCooponCode(): Nightmare {
+    return this.nightmare.evaluate(() => document.querySelector('#cooponCode').textContent);
+  }
+
+  end(): Nightmare {
+    return this.nightmare.end();
+  }
 };
 

@@ -7,7 +7,6 @@ co(function * (){
   yield gusto.agreeTerms();
 
   while(true){
-    yield gusto.wait(3000);
     yield gusto.answerQuestions();
     if(yield gusto.hasCooponCode){ break; }
     yield gusto.nextPage();

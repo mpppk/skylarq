@@ -129,5 +129,17 @@ module.exports = class GustoAutometer {
       }
     });
   }
+
+  extractRemainQuestionNum(): Nightmare {
+    return this.nightmare.evaluate(() => {
+      const remainQuestionText: string | null = document.querySelector('.progressBox>p').textContent;
+      if (remainQuestionText === null) {
+        throw new Error('remain question text not found');
+      }
+
+      const remainQuestionNumStr: string = remainQuestionText.replace('あと', '').replace('問', '');
+      return parseInt(remainQuestionNumStr);
+    });
+  }
 };
 

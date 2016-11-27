@@ -12,9 +12,9 @@ module.exports = class GustoAutometer {
   SUB_QUESTION_LIST: string[];
   EXCEPTIONAL_QUESTION_LIST: string[];
   beforeQuestions: string[];
-  constructor(settingFilePath: string) {
+  constructor(settingFilePath: string, showBrowser: boolean = false) {
     this.setting = yaml.safeLoad(fs.readFileSync(settingFilePath || './gusto.yml', 'utf8'));
-    this.nightmare = new Nightmare({ show: true }).goto('https://my.skylark.co.jp');
+    this.nightmare = new Nightmare({ show: showBrowser }).goto('https://my.skylark.co.jp');
     this.questions = this.setting.questions;
     this.SUB_QUESTION_LIST = ['下記についてお答えください。', '下記の点での満足度をお聞かせください。', '今回の来店体験からお答えください。'];
     this.EXCEPTIONAL_QUESTION_LIST = ['1ヶ月以内にこのガストに再来店する。', '一緒に来店された人数についてお聞かせください。'];

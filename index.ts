@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import * as co from 'co';
-import { GustoAutometer } from './src/GustoAutometer';
+import { GustoQuestionnaire } from './src/GustoQuestionnaire';
 import * as ProgressBar from 'progress';
 import * as program from 'commander';
 
@@ -12,7 +12,6 @@ interface CLI extends commander.ICommand {
 
 const barSetting = { total: 33 };
 const bar: ProgressBar = new ProgressBar('[:bar] :current/:total :percent :elapseds :etas', barSetting);
-bar.update(0);
 
 const cli: CLI = program
   .version('0.0.1')
@@ -22,7 +21,7 @@ const cli: CLI = program
 
 co(function * (){
   // 必ずfilePathには何らかの値が含まれるはずなのでnullチェックを無視
-  const gusto: GustoAutometer = new GustoAutometer(cli.filePath!, cli.browser);
+  const gusto: GustoQuestionnaire = new GustoQuestionnaire(cli.filePath!, cli.browser);
   yield gusto.insertCode();
   yield gusto.agreeTerms();
 

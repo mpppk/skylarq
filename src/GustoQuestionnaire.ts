@@ -5,7 +5,7 @@ import * as co from 'co';
 import { Setting } from './Setting';
 import { Question } from './Question';
 
-export class GustoAutometer {
+export class GustoQuestionnaire {
   nightmare: Nightmare;
   setting: Setting;
   questions: { [index: string]: Question; };

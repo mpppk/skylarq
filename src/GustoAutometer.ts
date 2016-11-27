@@ -38,7 +38,11 @@ module.exports = class GustoAutometer {
 
   extractQuestions(): Nightmare {
     return this.nightmare.evaluate(SUB_QUESTION_LIST => {
-        const mainQuestionText: string | null = document.querySelector('.mainQuestion').textContent;
+        const mainQuestionDom = document.querySelector('.mainQuestion');
+        if (mainQuestionDom === null) {
+          throw new Error('main question not found');
+        }
+        const mainQuestionText: string | null = mainQuestionDom.textContent;
         if (mainQuestionText === null) {
           throw new Error('main question text not found');
         }
@@ -87,7 +91,7 @@ module.exports = class GustoAutometer {
   answerQuestions(): Promise<Nightmare> {
     const self = this;
     return co(function*(){
-        let qs = yield self.waitForNextQuestion();
+        let qs = yield self.extractQuestions();
         yield self.validateQuestions(qs);
         return yield self.inputAnswer(qs);
     });
@@ -113,15 +117,18 @@ module.exports = class GustoAutometer {
     return this.nightmare.end();
   }
 
-  waitForNextQuestion(): Promise<Nightmare> {
+  waitForNextQuestionOrCooponCode(): Promise<Nightmare> {
     const self = this;
     return co(function*(){
       while (true) {
         try {
           yield self.nightmare.wait(100);
+
+          if(yield self.hasCooponCode()){ return self.getCooponCode(); }
+
           const qs: string[] = yield self.extractQuestions();
-          if (qs === null || typeof qs === 'undefined' || qs.length === 0) { continue; };
-          if (JSON.stringify(qs) === JSON.stringify(self.beforeQuestions)) { continue; };
+          if (qs === null || typeof qs === 'undefined' || qs.length === 0) { continue; }
+          if (JSON.stringify(qs) === JSON.stringify(self.beforeQuestions)) { continue; }
           self.beforeQuestions = qs;
           return qs;
         }catch (e) {

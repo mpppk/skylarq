@@ -10,6 +10,7 @@
   },
   "keywords": [],
   "author": "mpppk",
+  "repository": "https://github.com/mpppk/skylarq",
   "license": "MIT",
   "dependencies": {
     "@types/js-yaml": "^3.5.28",

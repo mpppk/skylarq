@@ -101,11 +101,11 @@ export class GustoQuestionnaire {
       return this.nightmare.wait('a.nextBtn').click('a.nextBtn');
   }
 
-  public hasCooponCode(): Nightmare {
+  public hasCouponCode(): Nightmare {
     return this.nightmare.exists('#cooponCode');
   }
 
-  public getCooponCode(): Nightmare {
+  public getCouponCode(): Nightmare {
     return this.nightmare.evaluate(() => document.querySelector('#cooponCode').textContent);
   }
 
@@ -113,14 +113,14 @@ export class GustoQuestionnaire {
     return this.nightmare.end();
   }
 
-  public waitForNextQuestionOrCooponCode(): Promise<Nightmare> {
+  public waitForNextQuestionOrCouponCode(): Promise<Nightmare> {
     const self = this;
     return co(function*(){
       while (true) {
         try {
           yield self.nightmare.wait(100);
 
-          if (yield self.hasCooponCode()) { return self.getCooponCode(); }
+          if (yield self.hasCouponCode()) { return self.getCouponCode(); }
 
           const qs: string[] = yield self.extractQuestions();
           if (qs === null || typeof qs === 'undefined' || qs.length === 0) { continue; }
@@ -144,5 +144,5 @@ export class GustoQuestionnaire {
       return parseInt(remainQuestionNumStr);
     });
   }
-};
+}
 

@@ -20,21 +20,21 @@ const cli: CLI = program
   .parse(process.argv);
 
 co(function * (){
-  // 必ずfilePathには何らかの値が含まれるはずなのでnullチェックを無視
+  // filePath have default value(./gusto.yml), so ignore null check.
   const gusto: GustoQuestionnaire = new GustoQuestionnaire(cli.filePath!, cli.browser);
   yield gusto.insertCode();
   yield gusto.agreeTerms();
 
   while (true) {
-    yield gusto.waitForNextQuestionOrCooponCode();
-    if (yield gusto.hasCooponCode()) { break; }
+    yield gusto.waitForNextQuestionOrCouponCode();
+    if (yield gusto.hasCouponCode()) { break; }
     yield gusto.answerQuestions();
     let remainQuestionNum: number = yield gusto.extractRemainQuestionNum();
     bar.update((barSetting.total - remainQuestionNum) / barSetting.total);
     yield gusto.nextPage();
   }
 
-  const cooponCode: number = yield gusto.getCooponCode();
-  console.log('coopon code: ' + cooponCode);
-  // yield gusto.end();
+  const couponCode: number = yield gusto.getCouponCode();
+  console.log('coupon code: ' + couponCode);
+  yield gusto.end();
 });

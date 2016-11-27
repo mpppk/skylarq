@@ -5,7 +5,7 @@ import * as co from 'co';
 import { Setting } from './Setting';
 import { Question } from './Question';
 
-module.exports = class GustoAutometer {
+export class SkylarQ {
   nightmare: Nightmare;
   setting: Setting;
   questions: { [index: string]: Question; };
@@ -13,7 +13,7 @@ module.exports = class GustoAutometer {
   EXCEPTIONAL_QUESTION_LIST: string[];
   beforeQuestions: string[];
   constructor(settingFilePath: string, showBrowser: boolean = false) {
-    this.setting = yaml.safeLoad(fs.readFileSync(settingFilePath || './gusto.yml', 'utf8'));
+    this.setting = yaml.safeLoad(fs.readFileSync(settingFilePath || './skylarq.yml', 'utf8'));
     this.nightmare = new Nightmare({ show: showBrowser }).goto('https://my.skylark.co.jp');
     this.questions = this.setting.questions;
     this.SUB_QUESTION_LIST = ['下記についてお答えください。', '下記の点での満足度をお聞かせください。', '今回の来店体験からお答えください。'];
@@ -21,22 +21,22 @@ module.exports = class GustoAutometer {
     this.beforeQuestions = ['none'];
 }
 
-  getAnswer(q: string): string | null {
+  private getAnswer(q: string): string | null {
     return (typeof this.questions[q] === undefined) ? null : this.questions[q].answer;
   }
 
-  getAnswerNum(q: string): number {
+  private getAnswerNum(q: string): number {
     const answer: string | null = this.getAnswer(q);
     return answer === null ? -1 : this.questions[q].choices.indexOf(answer);
   }
 
   // q => 質問内容の文字列, i => 何番目の質問か, qsLength => 全体で何問質問があるか
-  getIndexFromQuestionList(q: string, i: number, qsLength: number): number {
+  private getIndexFromQuestionList(q: string, i: number, qsLength: number): number {
     if (this.EXCEPTIONAL_QUESTION_LIST.includes(q)) {return 4; }
     return (qsLength === 1) ? 3 : ((i + 1) * 2 + 2);
   }
 
-  extractQuestions(): Nightmare {
+  private extractQuestions(): Nightmare {
     return this.nightmare.evaluate(SUB_QUESTION_LIST => {
         const mainQuestionDom = document.querySelector('.mainQuestion');
         if (mainQuestionDom === null) {
@@ -53,18 +53,18 @@ module.exports = class GustoAutometer {
     }, this.SUB_QUESTION_LIST);
   }
 
-  getInvalidQuestions(qs: string[]): string[] {
+  private getInvalidQuestions(qs: string[]): string[] {
     return qs.filter( q => typeof this.questions[q] === 'undefined');
   }
 
-  validateQuestions(qs: string[]): Promise<string[]> {
+  private validateQuestions(qs: string[]): Promise<string[]> {
     const invalidQuestions: string[] = this.getInvalidQuestions(qs);
     return (invalidQuestions.length > 0) ?
         Promise.reject( new Error('予期しない質問です(' + invalidQuestions + ')')) :
         Promise.resolve(qs);
   };
 
-  inputAnswer(qs: string[]): Promise<Nightmare> {
+  private inputAnswer(qs: string[]): Promise<Nightmare> {
     qs.forEach((q, i) => {
         if (typeof this.questions[q].choices !== 'undefined') {
             // nth-of-typeのindexがなぜこうなるのかは分からないがこれで取れる
@@ -78,17 +78,17 @@ module.exports = class GustoAutometer {
     return Promise.resolve(this.nightmare);
   }
 
-  insertCode(): Nightmare {
+  public insertCode(): Nightmare {
     return this.nightmare.insert('input[id*="code"]', this.setting.code.toString()).click('a[class="btn"]');
   }
 
-  agreeTerms(): Nightmare {
+  public agreeTerms(): Nightmare {
     return this.nightmare.wait('#agreeContainer>#agree')
     .check('#agreeContainer>#agree')
     .click('.inputContainer>.btn');
   }
 
-  answerQuestions(): Promise<Nightmare> {
+  public answerQuestions(): Promise<Nightmare> {
     const self = this;
     return co(function*(){
         let qs = yield self.extractQuestions();
@@ -97,34 +97,30 @@ module.exports = class GustoAutometer {
     });
   }
 
-  nextPage(): Nightmare {
+  public nextPage(): Nightmare {
       return this.nightmare.wait('a.nextBtn').click('a.nextBtn');
   }
 
-  wait(time: number): Nightmare {
-    return this.nightmare.wait(time);
-  }
-
-  hasCooponCode(): Nightmare {
+  public hasCouponCode(): Nightmare {
     return this.nightmare.exists('#cooponCode');
   }
 
-  getCooponCode(): Nightmare {
+  public getCouponCode(): Nightmare {
     return this.nightmare.evaluate(() => document.querySelector('#cooponCode').textContent);
   }
 
-  end(): Nightmare {
+  public end(): Nightmare {
     return this.nightmare.end();
   }
 
-  waitForNextQuestionOrCooponCode(): Promise<Nightmare> {
+  public waitForNextQuestionOrCouponCode(): Promise<Nightmare> {
     const self = this;
     return co(function*(){
       while (true) {
         try {
           yield self.nightmare.wait(100);
 
-          if(yield self.hasCooponCode()){ return self.getCooponCode(); }
+          if (yield self.hasCouponCode()) { return self.getCouponCode(); }
 
           const qs: string[] = yield self.extractQuestions();
           if (qs === null || typeof qs === 'undefined' || qs.length === 0) { continue; }
@@ -137,7 +133,7 @@ module.exports = class GustoAutometer {
     });
   }
 
-  extractRemainQuestionNum(): Nightmare {
+  public extractRemainQuestionNum(): Nightmare {
     return this.nightmare.evaluate(() => {
       const remainQuestionText: string | null = document.querySelector('.progressBox>p').textContent;
       if (remainQuestionText === null) {
@@ -148,5 +144,5 @@ module.exports = class GustoAutometer {
       return parseInt(remainQuestionNumStr);
     });
   }
-};
+}
 

@@ -26,9 +26,9 @@ co(function * (){
   yield gusto.insertCode();
   yield gusto.agreeTerms();
 
-  while(true){
+  while (true) {
     yield gusto.waitForNextQuestionOrCooponCode();
-    if(yield gusto.hasCooponCode()){ break; }
+    if (yield gusto.hasCooponCode()) { break; }
     yield gusto.answerQuestions();
     let remainQuestionNum: number = yield gusto.extractRemainQuestionNum();
     bar.update((barSetting.total - remainQuestionNum) / barSetting.total);

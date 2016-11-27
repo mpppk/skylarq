@@ -11,7 +11,7 @@ co(function * (){
   yield gusto.agreeTerms();
 
   while(true){
-    gusto.wait(1000);
+    yield gusto.waitForNextQuestionOrCooponCode();
     if(yield gusto.hasCooponCode()){ break; }
     yield gusto.answerQuestions();
     let remainQuestionNum = yield gusto.extractRemainQuestionNum();

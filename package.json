@@ -23,6 +23,6 @@
     "typescript": "^2.0.9"
   },
   "bin": {
-    "gustoq": "index.js"
+    "gustoq": "build/index.js"
   }
 }

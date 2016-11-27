@@ -5,7 +5,7 @@ import * as co from 'co';
 import { Setting } from './Setting';
 import { Question } from './Question';
 
-module.exports = class {
+export class GustoAutometer{
   nightmare: Nightmare;
   setting: Setting;
   questions: { [index: string]: Question; };
@@ -120,7 +120,7 @@ module.exports = class {
         try {
           yield self.nightmare.wait(100);
 
-          if(yield self.hasCooponCode()){ return self.getCooponCode(); }
+          if (yield self.hasCooponCode()) { return self.getCooponCode(); }
 
           const qs: string[] = yield self.extractQuestions();
           if (qs === null || typeof qs === 'undefined' || qs.length === 0) { continue; }

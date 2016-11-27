@@ -1,13 +1,13 @@
 {
-  "name": "gusto_questionnaire_autometer",
+  "name": "skylarq",
   "version": "0.0.1",
-  "description": "",
+  "description": "CLI tool for automatically answering questionnaires of Skylark",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "mpppk",
   "license": "MIT",
   "dependencies": {
     "@types/js-yaml": "^3.5.28",
@@ -23,6 +23,6 @@
     "typescript": "^2.0.9"
   },
   "bin": {
-    "gustoq": "build/index.js"
+    "skylarq": "build/index.js"
   }
 }

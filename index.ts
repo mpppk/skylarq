@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import * as co from 'co';
-import { GustoQuestionnaire } from './src/GustoQuestionnaire';
+import { SkylarQ } from './src/SkylarQ';
 import * as ProgressBar from 'progress';
 import * as program from 'commander';
 
@@ -16,25 +16,25 @@ const bar: ProgressBar = new ProgressBar('[:bar] :current/:total :percent :elaps
 const cli: CLI = program
   .version('0.0.1')
   .option('-b, --browser', 'Show browser')
-  .option('-f, --file-path [path]', 'Specify config file path', './gusto.yml')
+  .option('-f, --file-path [path]', 'Specify config file path', './skylarq.yml')
   .parse(process.argv);
 
 co(function * (){
-  // filePath have default value(./gusto.yml), so ignore null check.
-  const gusto: GustoQuestionnaire = new GustoQuestionnaire(cli.filePath!, cli.browser);
-  yield gusto.insertCode();
-  yield gusto.agreeTerms();
+  // filePath have default value(./skylarq.yml), so ignore null check.
+  const skylarq: SkylarQ = new SkylarQ(cli.filePath!, cli.browser);
+  yield skylarq.insertCode();
+  yield skylarq.agreeTerms();
 
   while (true) {
-    yield gusto.waitForNextQuestionOrCouponCode();
-    if (yield gusto.hasCouponCode()) { break; }
-    yield gusto.answerQuestions();
-    let remainQuestionNum: number = yield gusto.extractRemainQuestionNum();
+    yield skylarq.waitForNextQuestionOrCouponCode();
+    if (yield skylarq.hasCouponCode()) { break; }
+    yield skylarq.answerQuestions();
+    let remainQuestionNum: number = yield skylarq.extractRemainQuestionNum();
     bar.update((barSetting.total - remainQuestionNum) / barSetting.total);
-    yield gusto.nextPage();
+    yield skylarq.nextPage();
   }
 
-  const couponCode: number = yield gusto.getCouponCode();
+  const couponCode: number = yield skylarq.getCouponCode();
   console.log('coupon code: ' + couponCode);
-  yield gusto.end();
+  yield skylarq.end();
 });

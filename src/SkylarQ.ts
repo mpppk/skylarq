@@ -5,7 +5,7 @@ import * as co from 'co';
 import { Setting } from './Setting';
 import { Question } from './Question';
 
-export class GustoQuestionnaire {
+export class SkylarQ {
   nightmare: Nightmare;
   setting: Setting;
   questions: { [index: string]: Question; };
@@ -13,7 +13,7 @@ export class GustoQuestionnaire {
   EXCEPTIONAL_QUESTION_LIST: string[];
   beforeQuestions: string[];
   constructor(settingFilePath: string, showBrowser: boolean = false) {
-    this.setting = yaml.safeLoad(fs.readFileSync(settingFilePath || './gusto.yml', 'utf8'));
+    this.setting = yaml.safeLoad(fs.readFileSync(settingFilePath || './skylarq.yml', 'utf8'));
     this.nightmare = new Nightmare({ show: showBrowser }).goto('https://my.skylark.co.jp');
     this.questions = this.setting.questions;
     this.SUB_QUESTION_LIST = ['下記についてお答えください。', '下記の点での満足度をお聞かせください。', '今回の来店体験からお答えください。'];

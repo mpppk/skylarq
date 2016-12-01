@@ -5,6 +5,9 @@ import * as co from 'co';
 import { Setting } from './Setting';
 import { Question } from './Question';
 
+/**
+ * Skylarkのアンケートに自動回答するためのクラス
+ */
 export class SkylarQ {
   nightmare: Nightmare;
   setting: Setting;
@@ -21,21 +24,41 @@ export class SkylarQ {
     this.beforeQuestions = ['none'];
 }
 
+  /**
+   * 与えられた質問文に対応する、設定ファイルに書かれた回答を返す
+   * @param q 質問文
+   * @returns {string}　対応する回答
+   */
   private getAnswer(q: string): string | null {
     return (typeof this.questions[q] === undefined) ? null : this.questions[q].answer;
   }
 
+  /**
+   * 与えられた質問文に対応する回答が、上から何番目の選択肢かをを返す
+   * @param q 質問文
+   * @returns {number} 回答が上から何番目か
+   */
   private getAnswerNum(q: string): number {
     const answer: string | null = this.getAnswer(q);
     return answer === null ? -1 : this.questions[q].choices.indexOf(answer);
   }
 
-  // q => 質問内容の文字列, i => 何番目の質問か, qsLength => 全体で何問質問があるか
+  /**
+   * 質問文に対応する回答のDOM上のindexを返す
+   * @param q 質問文
+   * @param i qが何番目の質問か
+   * @param qsLength 全体で何問質問があるか
+   * @returns {number} DOM上のindex
+   */
   private getIndexFromQuestionList(q: string, i: number, qsLength: number): number {
     if (this.EXCEPTIONAL_QUESTION_LIST.includes(q)) {return 4; }
     return (qsLength === 1) ? 3 : ((i + 1) * 2 + 2);
   }
 
+  /**
+   * 質問リストをページから取得して返す
+   * @returns {Nightmare} 取得した質問リスト(非同期)
+   */
   private extractQuestions(): Nightmare {
     return this.nightmare.evaluate(SUB_QUESTION_LIST => {
         const mainQuestionDom = document.querySelector('.mainQuestion');
@@ -53,10 +76,20 @@ export class SkylarQ {
     }, this.SUB_QUESTION_LIST);
   }
 
+  /**
+   * 与えられた質問リストのうち、不正な質問を返す
+   * @param qs チェックする質問リスト
+   * @returns {string[]} 不正な質問リスト
+   */
   private getInvalidQuestions(qs: string[]): string[] {
     return qs.filter( q => typeof this.questions[q] === 'undefined');
   }
 
+  /**
+   * 与えられた質問リストに不正な質問が含まれていればrejectする
+   * @param qs　チェックする質問リスト
+   * @returns {Promise<never>|Promise<string[]>}
+   */
   private validateQuestions(qs: string[]): Promise<string[]> {
     const invalidQuestions: string[] = this.getInvalidQuestions(qs);
     return (invalidQuestions.length > 0) ?
@@ -64,6 +97,11 @@ export class SkylarQ {
         Promise.resolve(qs);
   };
 
+  /**
+   * 与えられた質問リストに対応する回答をブラウザに入力する
+   * @param qs　質問リスト
+   * @returns {Promise<T>}
+   */
   private inputAnswer(qs: string[]): Promise<Nightmare> {
     qs.forEach((q, i) => {
         if (typeof this.questions[q].choices !== 'undefined') {
@@ -78,16 +116,28 @@ export class SkylarQ {
     return Promise.resolve(this.nightmare);
   }
 
+  /**
+   * レシートに記載されている番号を設定ファイルから参照して入力し、次の画面へ進む
+   * @returns {Nightmare}
+   */
   public insertCode(): Nightmare {
     return this.nightmare.insert('input[id*="code"]', this.setting.code.toString()).click('a[class="btn"]');
   }
 
+  /**
+   * 規約に同意し、次の画面へ進む
+   * @returns {Nightmare}
+   */
   public agreeTerms(): Nightmare {
     return this.nightmare.wait('#agreeContainer>#agree')
     .check('#agreeContainer>#agree')
     .click('.inputContainer>.btn');
   }
 
+  /**
+   * 質問に回答する
+   * @returns {Promise<R>}
+   */
   public answerQuestions(): Promise<Nightmare> {
     const self = this;
     return co(function*(){
@@ -97,14 +147,26 @@ export class SkylarQ {
     });
   }
 
+  /**
+   * 次の画面へ進む
+   * @returns {Nightmare}
+   */
   public nextPage(): Nightmare {
       return this.nightmare.wait('a.nextBtn').click('a.nextBtn');
   }
 
+  /**
+   * 5桁のクーポンコードが表示されているかを判定する
+   * @returns {Nightmare} クーポンコード表示の有無
+   */
   public hasCouponCode(): Nightmare {
     return this.nightmare.exists('#cooponCode');
   }
 
+  /**
+   * 5桁のクーポンコードを返す
+   * @returns {Nightmare} クーポンコード
+   */
   public getCouponCode(): Nightmare {
     return this.nightmare.evaluate(() => document.querySelector('#cooponCode').textContent);
   }
@@ -113,6 +175,10 @@ export class SkylarQ {
     return this.nightmare.end();
   }
 
+  /**
+   * 次の質問かクーポンコードが表示されるまで待つ
+   * @returns {Promise<R>}
+   */
   public waitForNextQuestionOrCouponCode(): Promise<Nightmare> {
     const self = this;
     return co(function*(){
@@ -133,6 +199,10 @@ export class SkylarQ {
     });
   }
 
+  /**
+   * 残りの質問数をブラウザから取得する
+   * @returns {Nightmare} 残りの質問数
+   */
   public extractRemainQuestionNum(): Nightmare {
     return this.nightmare.evaluate(() => {
       const remainQuestionText: string | null = document.querySelector('.progressBox>p').textContent;

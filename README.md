@@ -1,6 +1,8 @@
 # SkylarQ
 SkylarQ is CLI tool for automatically answering questionnaires of Skylark.
 
+![demo](imgs/skylarq_demo.gif)
+
 ## Installation
 ```Shell
 $ npm install -g skylarq

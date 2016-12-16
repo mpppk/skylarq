@@ -1,2 +1,6 @@
 src/
+.idea/
+.vscode/
+imgs/
+typings/
 

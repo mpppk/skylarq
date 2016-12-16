@@ -8,6 +8,7 @@ import * as fs from 'fs-extra';
 
 interface CLI extends commander.ICommand {
   filePath?: string;
+  iAgreeTerms?: boolean;
   browser?: boolean;
   init?: boolean;
 }
@@ -22,6 +23,7 @@ const DEFAULT_SETTING_FILE_PATH: string = HOME_DIR + '/skylarq.yml';
 const cli: CLI = program
   .version('0.0.1')
   .option('-b, --browser', 'show browser')
+  .option('--i-agree-terms', `Express agreement to the terms.(You must read terms and specify this flag before using skylarq. If you don't read yet or can't agree the terms, don't use this flag.)`, false)
   .option('--init', 'create setting file to home directory')
   .option('-f, --file-path [path]', 'specify config file path', DEFAULT_SETTING_FILE_PATH)
   .parse(process.argv);
@@ -35,6 +37,11 @@ if (cli.init) {
     console.log(`${DEFAULT_SETTING_FILE_PATH} is already exist`);
     process.exit(1);
   }
+}
+
+if (!cli.iAgreeTerms) {
+  console.log('Before start skylarq, you must read terms and specify --i-agree-terms flag if you can agree.');
+  process.exit(0);
 }
 
 co(function * (){

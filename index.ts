@@ -21,7 +21,7 @@ const ORG_SETTING_FILE_PATH: string = './skylarq.yml';
 const DEFAULT_SETTING_FILE_PATH: string = HOME_DIR + '/skylarq.yml';
 
 const cli: CLI = program
-  .version('0.0.2')
+  .version('0.0.3')
   .option('-b, --browser', 'show browser')
   .option('--i-agree-terms', `Express agreement to the terms.(You must read terms and specify this flag before using skylarq. If you don't read yet or can't agree the terms, don't use this flag.)`, false)
   .option('--init', 'create setting file to home directory')

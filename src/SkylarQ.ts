@@ -107,6 +107,9 @@ export class SkylarQ {
         if (typeof this.questions[q].choices !== 'undefined') {
             // nth-of-typeのindexがなぜこうなるのかは分からないがこれで取れる
             const answerIndex = this.getAnswerNum(q) + 1;
+
+            if (answerIndex === 0) { return Promise.reject(`回答が入力されていません。質問:${q}`); }
+
             const selector = '.choices:nth-of-type(' + this.getIndexFromQuestionList(q, i, qs.length) + ')>.choice:nth-of-type(' + answerIndex + ') label';
             this.nightmare.click(selector);
         }else {

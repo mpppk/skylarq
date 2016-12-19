@@ -23,7 +23,7 @@ $ npm install -g skylarq
     $ vim ~/skylarq.yml
     ```
     * Update receipt code
-    * Update answers to questions 
+    * Input answers to questions 
 
 1. Execute command
     ```Shell

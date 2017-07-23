@@ -1,4 +1,6 @@
 # SkylarQ
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/mpppk/skylarq.svg)](https://greenkeeper.io/)
 SkylarQ is CLI tool for automatically answering questionnaires of すかいらーく.
 
 ![demo](imgs/skylarq_demo.gif)
